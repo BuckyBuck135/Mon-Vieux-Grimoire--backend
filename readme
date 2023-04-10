@@ -1,0 +1,4 @@
+// démarrer le serveur et mises à jour à chaque enregistrement
+// nodemon server
+
+// le serveur écoute le port 4000 par défaut
