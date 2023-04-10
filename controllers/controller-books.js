@@ -1,0 +1,120 @@
+const Book = require("../models/Book")
+const fs = require("fs")
+
+exports.createBook = (req, res, next) => {
+    const bookObject = JSON.parse(req.body.book)
+    delete bookObject._id
+    delete bookObject.userId
+    const book = new Book({
+        ...bookObject,
+        userId: req.auth.userId,
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+    })
+
+    book.save()
+        .then(() => res.status(201).json({message: "Livre enregistré avec succès"}))
+        .catch((error) => res.status(400).json({error}))
+}
+
+// GET
+exports.getAllBooks = (req, res, next) => {
+    Book.find()
+        .then(books => res.status(200).json(books))
+        .catch(error => res.status(400).json({error}))
+}
+
+exports.getOneBook = (req, res, next) => {
+    Book.findById(req.params.id)
+    .then(book => {res.status(200).json(book)})
+    .catch(error => res.status(400).json({error}))
+}
+
+exports.getBestBooks = (req, res, next) => {
+    const maxResults = 3; // Maximum number of results to retrieve
+  
+    Book.aggregate([
+      {
+        $sort: { averageRating: -1 }
+      },
+      {
+        $limit: maxResults
+      }
+    ])
+        .then(books => res.status(200).json(books))
+        .catch(error => res.status(400).json({error: error.message}))
+}
+
+exports.deleteBook = (req, res, next) => {
+    console.log(req.headers)
+    Book.findById(req.params.id)
+        .then(book => {
+            if (book.userId != req.auth.userId) {
+                res.status(403).json({message: "Requête non-autorisée"})
+            } else {
+                const filename = book.imageUrl.split("/images/")[1]
+                fs.unlink(`images/${filename}`, () => {
+                    Book.deleteOne({_id: req.params.id})
+                        .then(() => {res.status(200).json({message: "Objet supprimé !"})})
+                        .catch(error => res.status(401).json({error}))
+                })
+            }
+        })
+        .catch(error => res.status(500).json({error}))
+}
+
+exports.updateBook = (req, res, next) => {
+    const {id} = req.params
+    // vérifie si un fichier a été inclus dans la requête.
+    const bookObject = req.file ? {
+        ...JSON.parse(req.body.book),
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+    } : {...req.body}
+    
+    //  supprime la clé "_userId" de l'objet "bookObject". Cela garantit que l'utilisateur ne peut pas modifier cette clé.
+    delete bookObject._userId
+    Book.findById(id)
+        .then((book) => {
+            // vérifie si l'utilisateur est autorisé à modifier cet objet 
+            if (book.userId != req.auth.userId) {
+                res.status(403).json({message : "Requête non-autorisée"})
+            } else {
+                Book.updateOne({_id: id}, {...bookObject, _id: id})
+                .then(() => res.status(200).json({message : "Objet modifié!"}))
+                .catch(error => res.status(401).json({error}))
+            }
+        })
+        .catch(error => res.status(500).json({error}))
+}
+
+exports.addRatingToBook = (req, res, next) => {
+    // déstructure l'objet req.body
+    const {userId, grade} = req.body
+  
+    Book.findById(req.params.id)
+        .then((book) => {
+            // if (!book) {
+            //   return res.status(404).json({message: "Not found"})
+            // }
+    
+            if (book.ratings.some((rating) => rating.userId === userId)) {
+            return res.status(400).json({message: "Vous avez déjà donné une note à ce livre"})
+            }
+            
+            // push la nouvelle note
+            book.ratings.push({userId, grade})
+            
+            // calcule la moyenne
+            const ratings = book.ratings.map((rating) => rating.grade)
+            const sum = ratings.reduce((accumulator, current) => accumulator + current, 0)
+            // pour gérer les décimales sur le back
+            // const average = parseFloat((sum / ratings.length).toFixed(1))
+            const average = sum / ratings.length
+            book.averageRating = average
+
+            book.save()
+                .then((book) => res.status(200).json(book))
+                .catch((error) => res.status(400).json({error}))
+        })
+
+        .catch(error => res.status(400).json({error}))
+  }
