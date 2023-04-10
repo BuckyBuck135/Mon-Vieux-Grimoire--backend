@@ -1,6 +1,7 @@
 const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
+const rateLimit = require("./middleware/rate-limiter")
 const {mongoDB_URI} = require("./config/config")
 
 mongoose.connect(mongoDB_URI)
@@ -15,7 +16,6 @@ const booksRoutes = require("./routes/routes-books")
 const userRoutes = require("./routes/routes-user")
 
 const cors = require("cors")
- 
 app.use(cors())
 // middleware pour headers CORS
 // app.use((req, res, next) => {
@@ -24,6 +24,18 @@ app.use(cors())
 //     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
 //     next()
 // })
+
+// const rateLimit = require("express-rate-limit")
+// const apiRequestLimiter = rateLimit({
+//   windowMs: 1 * 60 * 1000, // fenêtres de 1 minute
+//   max: 5, // limite chaque IP à 5 requêtes par 
+//   handler: function (req, res, next) {
+//     return res.status(429).json({error})
+//   }
+// })
+
+// Use the limit rule as an application middleware
+app.use(rateLimit)
 
 app.use("/api/books", booksRoutes)
 app.use("/api/auth", userRoutes)
