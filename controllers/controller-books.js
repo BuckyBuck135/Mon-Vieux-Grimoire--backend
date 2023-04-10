@@ -13,10 +13,9 @@ exports.createBook = (req, res, next) => {
 
     book.save()
         .then(() => res.status(201).json({message: "Livre enregistré avec succès"}))
-        .catch((error) => res.status(400).json({error}))
+        .catch(error => res.status(400).json({error}))
 }
 
-// GET
 exports.getAllBooks = (req, res, next) => {
     Book.find()
         .then(books => res.status(200).json(books))
@@ -25,16 +24,16 @@ exports.getAllBooks = (req, res, next) => {
 
 exports.getOneBook = (req, res, next) => {
     Book.findById(req.params.id)
-    .then(book => {res.status(200).json(book)})
-    .catch(error => res.status(400).json({error}))
+        .then(book => res.status(200).json(book))
+        .catch(error => res.status(400).json({error}))
 }
 
 exports.getBestBooks = (req, res, next) => {
-    const maxResults = 3; // Maximum number of results to retrieve
+    const maxResults = 3; 
   
     Book.aggregate([
       {
-        $sort: { averageRating: -1 }
+        $sort: {averageRating: -1}
       },
       {
         $limit: maxResults
@@ -45,7 +44,6 @@ exports.getBestBooks = (req, res, next) => {
 }
 
 exports.deleteBook = (req, res, next) => {
-    console.log(req.headers)
     Book.findById(req.params.id)
         .then(book => {
             if (book.userId != req.auth.userId) {
@@ -54,7 +52,7 @@ exports.deleteBook = (req, res, next) => {
                 const filename = book.imageUrl.split("/images/")[1]
                 fs.unlink(`images/${filename}`, () => {
                     Book.deleteOne({_id: req.params.id})
-                        .then(() => {res.status(200).json({message: "Objet supprimé !"})})
+                        .then(() => res.status(200).json({message: "Objet supprimé !"}))
                         .catch(error => res.status(401).json({error}))
                 })
             }
@@ -73,10 +71,10 @@ exports.updateBook = (req, res, next) => {
     //  supprime la clé "_userId" de l'objet "bookObject". Cela garantit que l'utilisateur ne peut pas modifier cette clé.
     delete bookObject._userId
     Book.findById(id)
-        .then((book) => {
+        .then(book => {
             // vérifie si l'utilisateur est autorisé à modifier cet objet 
             if (book.userId != req.auth.userId) {
-                res.status(403).json({message : "Requête non-autorisée"})
+                res.status(403).json({message:"Requête non-autorisée"})
             } else {
                 Book.updateOne({_id: id}, {...bookObject, _id: id})
                 .then(() => res.status(200).json({message : "Objet modifié!"}))
@@ -94,17 +92,13 @@ exports.addRatingToBook = (req, res, next) => {
     }
   
     Book.findById(req.params.id)
-        .then((book) => {
-
-            // if (!book) {
-            //   return res.status(404).json({message: "Not found"})
-            // }
+        .then(book => {
     
-            if (book.ratings.some((rating) => rating.userId === req.body.userId)) {
+            if (book.ratings.some(rating => rating.userId === req.body.userId)) {
             return res.status(400).json({message: "Vous avez déjà donné une note à ce livre"})
-            }
-            
-            // push la nouvelle note
+
+            } else {
+                // push la nouvelle note
             book.ratings.push(newRating)
             
             const ratings = book.ratings.map((rating) => rating.grade);
@@ -116,7 +110,7 @@ exports.addRatingToBook = (req, res, next) => {
             book.save()
                 .then(book => res.status(200).json(book))
                 .catch(error => res.status(400).json({error}))
+            }
         })
-
         .catch(error => res.status(400).json({error}))
   }
