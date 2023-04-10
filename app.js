@@ -1,8 +1,9 @@
 const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
+const {mongoDB_URI} = require("./config/config")
 
-mongoose.connect("mongodb+srv://geoffreylemeur:l1I1vbxdLTOpzc9F@cluster1.qspaovy.mongodb.net/?retryWrites=true&w=majority")
+mongoose.connect(mongoDB_URI)
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"))
 
