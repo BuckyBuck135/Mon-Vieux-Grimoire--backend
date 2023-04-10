@@ -1,10 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose")
 
 // créons un schéma de données qui contient les champs souhaités pour chaque Book
 const bookSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
     required: true
   },
   title: {
@@ -30,7 +29,6 @@ const bookSchema = new mongoose.Schema({
   ratings: [{
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'User',
       required: true
     },
     grade: {
@@ -42,8 +40,9 @@ const bookSchema = new mongoose.Schema({
   }],
   averageRating: {
     type: Number,
+    default: 0
   }
-});
+})
 
 //exportons ce schéma en tant que modèle Mongoose appelé « Book »
-module.exports = mongoose.model('Book', bookSchema);
+module.exports = mongoose.model("Book", bookSchema)
