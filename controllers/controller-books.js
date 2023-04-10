@@ -87,33 +87,35 @@ exports.updateBook = (req, res, next) => {
 }
 
 exports.addRatingToBook = (req, res, next) => {
-    // déstructure l'objet req.body
-    const {userId, grade} = req.body
+    // définition d'un nouvel objet car le serveur envoie "rating", et non "grade"
+    const newRating = {
+        userId: req.body.userId,
+        grade: req.body.rating
+    }
   
     Book.findById(req.params.id)
         .then((book) => {
+
             // if (!book) {
             //   return res.status(404).json({message: "Not found"})
             // }
     
-            if (book.ratings.some((rating) => rating.userId === userId)) {
+            if (book.ratings.some((rating) => rating.userId === req.body.userId)) {
             return res.status(400).json({message: "Vous avez déjà donné une note à ce livre"})
             }
             
             // push la nouvelle note
-            book.ratings.push({userId, grade})
+            book.ratings.push(newRating)
             
-            // calcule la moyenne
-            const ratings = book.ratings.map((rating) => rating.grade)
-            const sum = ratings.reduce((accumulator, current) => accumulator + current, 0)
-            // pour gérer les décimales sur le back
-            // const average = parseFloat((sum / ratings.length).toFixed(1))
-            const average = sum / ratings.length
-            book.averageRating = average
+            const ratings = book.ratings.map((rating) => rating.grade);
+            const sum = ratings.reduce((acc, cur) => acc + cur, 0);
+            // pour gérer les décimales sur le back (devrait être fait sur le front)
+            const average = parseFloat((sum / ratings.length).toFixed(1))
 
+            book.averageRating = average
             book.save()
-                .then((book) => res.status(200).json(book))
-                .catch((error) => res.status(400).json({error}))
+                .then(book => res.status(200).json(book))
+                .catch(error => res.status(400).json({error}))
         })
 
         .catch(error => res.status(400).json({error}))
