@@ -103,8 +103,12 @@ exports.addRatingToBook = (req, res, next) => {
             
             const ratings = book.ratings.map((rating) => rating.grade);
             const sum = ratings.reduce((acc, cur) => acc + cur, 0);
-            // pour gérer les décimales sur le back (devrait être fait sur le front)
-            const average = parseFloat((sum / ratings.length).toFixed(1))
+            // pour gérer les décimales sur le back; arondit à l'entier supérieur 
+            // (devrait être fait sur le front, qui gère mal l'affichage des étoiles avec un arrondisement incorrect)
+            const average = Math.ceil(sum / ratings.length)
+
+            // ou, si on veut un système à 1 décimale
+            // const average = parseFloat((sum / ratings.length).toFixed(1))
 
             book.averageRating = average
             book.save()
