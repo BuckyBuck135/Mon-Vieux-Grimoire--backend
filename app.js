@@ -2,9 +2,9 @@ const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
 const rateLimit = require("./middleware/rate-limiter")
-const {mongoDB_URI} = require("./config/config")
+require('dotenv').config()
 
-mongoose.connect(mongoDB_URI)
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"))
 

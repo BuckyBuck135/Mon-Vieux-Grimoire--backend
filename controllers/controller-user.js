@@ -1,8 +1,7 @@
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const User = require("../models/User")
-const {secretKey} = require("../config/config")
-
+require('dotenv').config()
 
 exports.signup = (req, res, next) => {
     // hash the password
@@ -46,7 +45,7 @@ exports.login = (req, res, next) => {
                                 userId: user._id,
                                 token: jwt.sign(
                                     {userId: user._id},
-                                    secretKey,
+                                    process.env.SECRETKEY,
                                     {expiresIn: "24h"}
                                 )
                             })

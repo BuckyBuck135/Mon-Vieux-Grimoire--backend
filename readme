@@ -1,3 +1,6 @@
+// installer les dépendances
+// npm install
+
 // démarrer le serveur et mises à jour à chaque enregistrement
 // nodemon server
 
