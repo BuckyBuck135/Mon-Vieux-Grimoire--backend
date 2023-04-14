@@ -20,7 +20,7 @@ exports.signup = (req, res, next) => {
         })
         // error code 500: server
         .catch(error => {
-            res.status(500).json({error})
+            res.status(500).json({error: error.message})
         })
 }
 
@@ -30,7 +30,7 @@ exports.login = (req, res, next) => {
         .then(user => {
             //Pas d'utilisateur enregistré avec cet identifiant
             if(!user) {
-                res.status(401).json({message: "Paire identifiant/mot de passe incorrecte"})
+                res.status(401).json({message: "Unauthorized"})
             //Utilisateur enregistré
             } else {
                 //compare le mot de passe fourni à celui existant dans la BdD
@@ -38,7 +38,7 @@ exports.login = (req, res, next) => {
                     .then(existingUser => {
                         //Pas d'utilisateur enregistré avec ce mot de passe
                         if(!existingUser) {
-                            res.status(401).json({message: "Paire identifiant/mot de passe incorrecte"})
+                            res.status(401).json({message: "Unauthorized"})
                         // On renvoie "authorization" comprenant le JWT
                         } else {
                             res.status(200).json({

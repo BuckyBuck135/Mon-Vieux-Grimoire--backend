@@ -3,17 +3,23 @@ const fs = require("fs")
 
 exports.createBook = (req, res, next) => {
     const bookObject = JSON.parse(req.body.book)
-    delete bookObject._id
-    delete bookObject.userId
-    const book = new Book({
+    
+    if (bookObject.userId != req.auth.userId) {
+        res.status(403).json({message:"Requête non-autorisée"})
+        
+    } else {
+        delete bookObject._id
+        const book = new Book({
         ...bookObject,
+        
         userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
-    })
+        })
 
-    book.save()
+        book.save()
         .then(() => res.status(201).json({message: "Livre enregistré avec succès"}))
         .catch(error => res.status(400).json({error}))
+    }
 }
 
 exports.getAllBooks = (req, res, next) => {
@@ -44,6 +50,8 @@ exports.getBestBooks = (req, res, next) => {
 }
 
 exports.deleteBook = (req, res, next) => {
+    console.log(req.body)
+
     Book.findById(req.params.id)
         .then(book => {
             if (book.userId != req.auth.userId) {
@@ -85,6 +93,7 @@ exports.updateBook = (req, res, next) => {
 }
 
 exports.addRatingToBook = (req, res, next) => {
+
     // définition d'un nouvel objet car le serveur envoie "rating", et non "grade"
     const newRating = {
         userId: req.body.userId,
@@ -93,11 +102,14 @@ exports.addRatingToBook = (req, res, next) => {
   
     Book.findById(req.params.id)
         .then(book => {
-    
-            if (book.ratings.some(rating => rating.userId === req.body.userId)) {
+            // la méthode .toHexString() transforme new ObjectId() en string
+            if (book.ratings.find(rating => rating.userId.toHexString() === req.body.userId)) {
+                console.log("deja note")
             return res.status(400).json({message: "Vous avez déjà donné une note à ce livre"})
 
             } else {
+                console.log("pas note")
+
                 // push la nouvelle note
             book.ratings.push(newRating)
             
@@ -118,3 +130,24 @@ exports.addRatingToBook = (req, res, next) => {
         })
         .catch(error => res.status(400).json({error}))
   }
+
+
+
+  // Versions alternatives
+
+  // Fonction create book - ne bloque PAS un utilisateur ayant conflit token/userId, mais va remplacer l'userId par le auth.userId
+//   exports.createBook = (req, res, next) => {
+//     const bookObject = JSON.parse(req.body.book)
+//     delete bookObject._id
+//     delete bookObject.userId
+//     const book = new Book({
+//         ...bookObject,
+        
+//         userId: req.auth.userId,
+//         imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+//     })
+
+//     book.save()
+//         .then(() => res.status(201).json({message: "Livre enregistré avec succès"}))
+//         .catch(error => res.status(400).json({error}))
+// }
