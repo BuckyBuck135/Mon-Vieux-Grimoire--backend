@@ -6,20 +6,20 @@
 
 // le serveur écoute le port 4000 par défaut
 
-// rate limiter : limite de requêtes à 50 par minute par IP. => middleware/rate-limiter.js
+// rate limiter : limite de requêtes à 100 par minute par IP. => middleware/rate-limiter.js
 
 // test users
-[
-    {
-        "email":"user1@test.com",
-        "password":"user1"
-    },
-    {
-        "email":"user2@test.com",
-        "password":"user2"
-    },
-    {
-        "email":"user3@test.com",
-        "password":"user3"
-    }
-]
+// [
+//     {
+//         "email":"user1@test.com",
+//         "password":"user1"
+//     },
+//     {
+//         "email":"user2@test.com",
+//         "password":"user2"
+//     },
+//     {
+//         "email":"user3@test.com",
+//         "password":"user3"
+//     }
+// ]
