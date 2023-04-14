@@ -1,7 +1,10 @@
 const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
+const cors = require("cors")
 const rateLimit = require("./middleware/rate-limiter")
+const timeOut = require("./middleware/timeOut")
+
 require('dotenv').config()
 
 mongoose.connect(process.env.MONGODB_URI)
@@ -12,21 +15,12 @@ mongoose.connect(process.env.MONGODB_URI)
 const app = express()
 app.use(express.json());
 
-const booksRoutes = require("./routes/routes-books")
-const userRoutes = require("./routes/routes-user")
+const booksRoutes = require("./routes/booksRoutes")
+const userRoutes = require("./routes/userRoutes")
 
-const cors = require("cors")
 app.use(cors())
-// middleware pour headers CORS
-// app.use((req, res, next) => {
-//     res.setHeader("Access-Control-Allow-Origin", "*")
-//     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization")
-//     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
-//     next()
-// })
-
 app.use(rateLimit)
-
+app.use(timeOut)
 app.use("/api/books", booksRoutes)
 app.use("/api/auth", userRoutes)
 app.use("/images", express.static(path.join(__dirname, "images")))
