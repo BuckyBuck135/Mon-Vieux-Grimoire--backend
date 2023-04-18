@@ -45,8 +45,8 @@ exports.getBestBooks = (req, res, next) => {
         $limit: maxResults
       }
     ])
-        .then(books => res.status(200).json(books))
-        .catch(error => res.status(400).json({error: error.message}))
+    .then(books => res.status(200).json(books))
+    .catch(error => res.status(400).json({error: error.message}))
 }
 
 exports.deleteBook = (req, res, next) => {
