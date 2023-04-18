@@ -1,7 +1,7 @@
 const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
-const rateLimit = require("./middleware/rate-limiter")
+// const rateLimit = require("./middleware/rate-limiter")
 require('dotenv').config()
 
 mongoose.connect(process.env.MONGODB_URI)
@@ -17,15 +17,9 @@ const userRoutes = require("./routes/routes-user")
 
 const cors = require("cors")
 app.use(cors())
-// middleware pour headers CORS
-// app.use((req, res, next) => {
-//     res.setHeader("Access-Control-Allow-Origin", "*")
-//     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization")
-//     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
-//     next()
-// })
 
-app.use(rateLimit)
+
+// app.use(rateLimit)
 
 app.use("/api/books", booksRoutes)
 app.use("/api/auth", userRoutes)
