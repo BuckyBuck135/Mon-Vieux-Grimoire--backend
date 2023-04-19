@@ -3,7 +3,7 @@ const fs = require("fs")
 
 exports.createBook = (req, res, next) => {
     const bookObject = JSON.parse(req.body.book)
-    
+    //empêche la création en cas de conflit ID/token
     if (bookObject.userId != req.auth.userId) {
         res.status(403).json({message:"Requête non-autorisée"})
         
@@ -104,23 +104,17 @@ exports.addRatingToBook = (req, res, next) => {
         .then(book => {
             // la méthode .toHexString() transforme new ObjectId() en string
             if (book.ratings.find(rating => rating.userId.toHexString() === req.body.userId)) {
-                console.log("deja note")
             return res.status(400).json({message: "Vous avez déjà donné une note à ce livre"})
 
             } else {
-                console.log("pas note")
-
-                // push la nouvelle note
+            // push la nouvelle note
             book.ratings.push(newRating)
             
             const ratings = book.ratings.map((rating) => rating.grade);
             const sum = ratings.reduce((acc, cur) => acc + cur, 0);
-            // pour gérer les décimales sur le back; arondit à l'entier supérieur 
+            // pour gérer les décimales sur le back; arrondit à l'entier supérieur 
             // (devrait être fait sur le front, qui gère mal l'affichage des étoiles avec un arrondisement incorrect)
             const average = Math.ceil(sum / ratings.length)
-
-            // ou, si on veut un système à 1 décimale
-            // const average = parseFloat((sum / ratings.length).toFixed(1))
 
             book.averageRating = average
             book.save()
@@ -128,14 +122,14 @@ exports.addRatingToBook = (req, res, next) => {
                 .catch(error => res.status(400).json({error}))
             }
         })
-        .catch(error => res.status(400).json({error}))
+        .catch(error => res.status(500).json({error}))
   }
 
 
 
-  // Versions alternatives
+// Version alternative createBook
 
-  // Fonction create book - ne bloque PAS un utilisateur ayant conflit token/userId, mais va remplacer l'userId par le auth.userId
+// Fonction create book - ne bloque PAS un utilisateur ayant conflit token/userId, mais va remplacer l'userId par le auth.userId
 //   exports.createBook = (req, res, next) => {
 //     const bookObject = JSON.parse(req.body.book)
 //     delete bookObject._id
