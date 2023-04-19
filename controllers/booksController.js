@@ -94,7 +94,7 @@ exports.updateBook = (req, res, next) => {
 
 exports.addRatingToBook = (req, res, next) => {
 
-    // définition d'un nouvel objet car le serveur envoie "rating", et non "grade"
+    // définition d'un nouvel objet car le front envoie "rating", et non "grade"
     const newRating = {
         userId: req.body.userId,
         grade: req.body.rating
