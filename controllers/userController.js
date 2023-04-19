@@ -4,18 +4,18 @@ const User = require("../models/User")
 require('dotenv').config()
 
 exports.signup = (req, res, next) => {
-    // hash the password
+    // hash le  mot de passe
     bcrypt.hash(req.body.password, 10)
-        //resolve the promise
         .then(hash => {
-            //create a new user
+            //création d'un nouvel User
             const user = new User({
                 email: req.body.email,
                 password: hash
             })
-            //save the user
+            //sauvegarde
             user.save()
                 .then(() => res.status(201).json({message: "Utilisateur créé"}))
+                // error code 400: client
                 .catch(error => res.status(400).json({error}))
         })
         // error code 500: server
@@ -30,7 +30,7 @@ exports.login = (req, res, next) => {
         .then(user => {
             //Pas d'utilisateur enregistré avec cet identifiant
             if(!user) {
-                res.status(401).json({message: "Unauthorized"})
+                res.status(401).json({message: "Requête non-autorisée"})
             //Utilisateur enregistré
             } else {
                 //compare le mot de passe fourni à celui existant dans la BdD
@@ -38,7 +38,7 @@ exports.login = (req, res, next) => {
                     .then(existingUser => {
                         //Pas d'utilisateur enregistré avec ce mot de passe
                         if(!existingUser) {
-                            res.status(401).json({message: "Unauthorized"})
+                            res.status(401).json({message: "Requête non-autorisée"})
                         // On renvoie "authorization" comprenant le JWT
                         } else {
                             res.status(200).json({
