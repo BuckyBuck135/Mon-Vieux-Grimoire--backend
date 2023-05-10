@@ -13,7 +13,9 @@ exports.createBook = (req, res, next) => {
         ...bookObject,
         
         userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+        // imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+        imageUrl: `https://${req.get("host")}/images/${req.file.filename}`
+
         })
 
         book.save()
@@ -23,6 +25,7 @@ exports.createBook = (req, res, next) => {
 }
 
 exports.getAllBooks = (req, res, next) => {
+    console.log(req.protocol)
     Book.find()
         .then(books => res.status(200).json(books))
         .catch(error => res.status(400).json({error}))
@@ -73,7 +76,7 @@ exports.updateBook = (req, res, next) => {
     // vérifie si un fichier a été inclus dans la requête.
     const bookObject = req.file ? {
         ...JSON.parse(req.body.book),
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+        imageUrl: `https://${req.get("host")}/images/${req.file.filename}`
     } : {...req.body}
     
     //  supprime la clé "_userId" de l'objet "bookObject". Cela garantit que l'utilisateur ne peut pas modifier cette clé.
